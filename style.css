@@ -1,0 +1,146 @@
+/* ============================================================
+   Proyecto   : InventaPlus - Sistema de Gestión de Equipos
+   Evidencia  : GA7-220501096-AA4-EV03 - Componente front-end
+   Hoja       : style.css (estilos del panel de administración)
+   Descripción: Personalización de los componentes Bootstrap 5
+                usados en admin.html: barra lateral, tarjetas de
+                indicadores, tablas, modales y formularios.
+   ============================================================ */
+
+/* ─── Base general ─────────────────────────────────────── */
+
+/* Fondo gris claro para diferenciar el área de trabajo */
+body {
+    background-color: #f8f9fa;
+}
+
+/* ─── Barra lateral de navegación ──────────────────────── */
+
+/* Sidebar con degradado corporativo a lo alto de la pantalla */
+.sidebar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: white;
+}
+/* Enlaces translúcidos que se resaltan al pasar el cursor o al activarse */
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    margin: 5px 0;
+    transition: all 0.3s;
+}
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Área principal de contenido con separación del sidebar */
+.main-content {
+    padding: 20px;
+}
+
+/* ─── Tarjetas y encabezados ───────────────────────────── */
+
+/* Tarjetas flotantes sin borde con sombra suave */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+/* Encabezado de tarjeta con el degradado corporativo */
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0 !important;
+    border: none;
+}
+
+/* ─── Botones primarios ────────────────────────────────── */
+
+/* Botón de acción principal con efecto de elevación */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* ─── Tablas de datos (DataTables) ─────────────────────── */
+
+/* Esquinas redondeadas y recorte del contenido interno */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+/* Encabezados de columna sin bordes y con peso semibold */
+.table thead th {
+    background: #f8f9fa;
+    border: none;
+    font-weight: 600;
+}
+
+/* Insignias de estado (Disponible/Asignado/Activa/Devuelta) en pastilla */
+.badge {
+    border-radius: 20px;
+    padding: 8px 12px;
+}
+
+/* ─── Modales de captura ───────────────────────────────── */
+
+/* Ventanas modales sin borde y esquinas suavizadas */
+.modal-content {
+    border: none;
+    border-radius: 15px;
+}
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    border: none;
+}
+
+/* ─── Formularios dentro de modales ────────────────────── */
+
+/* Campos con borde tenue que se resaltan en tono corporativo al enfocar */
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* ─── Tarjetas de estadísticas del dashboard ───────────── */
+
+/* Indicadores numéricos con animación de elevación */
+.stats-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s;
+}
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+/* Ícono cuadrado redondeado asociado a cada indicador */
+.stats-card .stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+/* Utilidad para ocultar secciones inactivas del panel */
+.hidden {
+    display: none !important;
+}

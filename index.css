@@ -1,0 +1,74 @@
+/* ============================================================
+   Proyecto   : InventaPlus - Sistema de Gestión de Equipos
+   Evidencia  : GA7-220501096-AA4-EV03 - Componente front-end
+   Hoja       : index.css (estilos de la vista de login)
+   Descripción: Personaliza la identidad visual del formulario
+                de autenticación sobre la base de Bootstrap 5.
+                Paleta: degradado morado/azul corporativo.
+   ============================================================ */
+
+/* Fondo a pantalla completa con degradado y centrado del contenido */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Tarjeta blanca central que contiene el formulario de acceso */
+.login-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Bloque del logotipo y nombre del sistema */
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.logo h1 {
+    color: #667eea;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.logo p {
+    color: #6c757d;
+    margin: 0;
+}
+
+/* Campos de texto con bordes redondeados y enfoque destacado */
+.form-control {
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+}
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Botón principal de ingreso con efecto de elevación al pasar el cursor */
+.btn-login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+    width: 100%;
+    transition: transform 0.2s;
+}
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Alertas de éxito/error: ocultas hasta que js/login.js las active */
+.alert {
+    border-radius: 10px;
+    display: none;
+}
