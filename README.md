@@ -74,18 +74,19 @@ Aplicación web desarrollada en PHP que permite administrar el inventario de equ
 
    > **Nota de seguridad:** `config_local.php` no se versiona en el repositorio (está en `.gitignore`). Si no existe, la conexión usa los valores por defecto del entorno de desarrollo.
 
-5. Importar el esquema: abra `http://localhost/pry/index.html` (ajuste la ruta según su instalación) e inicie sesión con las credenciales del administrador definidas al instalar, o créelas directamente en la tabla `administradores` con un hash bcrypt:
+5. Importar el esquema: abra `http://localhost/pry/index.html` (ajuste la ruta según su instalación) e inicie sesión con las credenciales iniciales del administrador: usuario `admin`, contraseña `admin123`. Para cambiar la contraseña, genere un hash bcrypt y actualice la tabla `administradores`:
 
    ```php
    <?php echo password_hash('SuClaveSegura', PASSWORD_BCRYPT); ?>
    ```
 
-   > Es obligatorio cambiar la contraseña del administrador inmediatamente después de la primera instalación.
+   > Es obligatorio cambiar la contraseña del administrador inmediatamente después de la primera instalación (`admin123` es solo para el primer inicio de sesión).
 
 ## Control de cambios
 
 | Fecha | Autor | Commit | Descripción |
 |---|---|---|---|
+| 2026-09-28 | Vago777 | `1acdd63` | Corrige la contraseña inicial del administrador: el seed de la BD ahora usa `admin` / `admin123` (hash bcrypt regenerado) |
 | 2026-09-28 | Vago777 | `1de8180` | Catálogo de áreas en base de datos: tabla `areas` con 9 dependencias, CRUD en el panel (`areas.php`) y campo de área de usuarios vinculado por id |
 | 2026-09-21 | Vago777 | `0a0c639` | Commit inicial del sistema InventaPlus: autenticación, CRUD de usuarios/equipos, asignaciones, dashboard y esquema de base de datos |
 | 2026-09-21 | — | `77fdf79` | Initial commit (README del repositorio) |
