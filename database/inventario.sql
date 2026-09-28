@@ -109,8 +109,8 @@ INSERT INTO areas (id, nombre, estado) VALUES
 INSERT INTO usuarios (identificacion, nombre, correo_sena, telefono, area_id)
 VALUES ('1090880011', 'Administrador del Sistema', 'admin@sena.edu.co', '3000000000', 1);
 
--- Usuario administrador. Contraseña inicial: admin123
--- Cambie la contraseña inmediatamente despues de la primera instalacion.
+-- Usuario administrador. La contrasena inicial se define al instalar
+-- y debe cambiarse inmediatamente despues de la primera instalacion.
 INSERT INTO administradores (usuario_id, username, password, estado)
 VALUES (1, 'admin', '$2y$10$CobrjHukMTjJPKXXS42rFOHDu/xeAqVt4QcVy1PbrQJAfuQiaDnD2', 'activo');
 
