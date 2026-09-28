@@ -27,6 +27,7 @@ Aplicación web desarrollada en PHP que permite administrar el inventario de equ
 ├── check_session.php    # Validación de sesión activa
 ├── logout.php           # Cierre de sesión
 ├── usuarios.php         # API REST de usuarios (CRUD)
+├── areas.php            # API REST de áreas (CRUD)
 ├── equipos.php          # API REST de equipos (CRUD)
 ├── asignaciones.php     # API REST de asignaciones
 ├── connection.php       # Conexión a la base de datos (PDO)
@@ -37,7 +38,8 @@ Aplicación web desarrollada en PHP que permite administrar el inventario de equ
 ## Funcionalidades
 
 - **Autenticación:** Inicio y cierre de sesión con manejo de sesiones PHP.
-- **Gestión de usuarios:** CRUD de aprendices/funcionarios (identificación, nombre, correo SENA, teléfono, área).
+- **Gestión de usuarios:** CRUD de aprendices/funcionarios (identificación, nombre, correo SENA, teléfono, área seleccionada del catálogo de dependencias).
+- **Gestión de áreas:** CRUD del catálogo de dependencias del SENA (Sistemas, Contabilidad, SST, Talento Humano, Archivo, Grupo Mixto, Biblioteca, Emprendimiento y Relaciones Corporativas), con estado activo/inactivo. No se permite eliminar un área que tenga usuarios asociados.
 - **Gestión de equipos:** CRUD de equipos de mesa y portátiles, con control de accesorios (mouse, teclado, cargador, RJ45) y estados (disponible, asignado, mantenimiento).
 - **Asignaciones:** Asignación y devolución de equipos con registro del administrador y fechas.
 - **Dashboard:** Indicadores de total de usuarios, equipos, asignaciones activas y equipos disponibles, con devolución rápida.
@@ -84,6 +86,7 @@ Aplicación web desarrollada en PHP que permite administrar el inventario de equ
 
 | Fecha | Autor | Commit | Descripción |
 |---|---|---|---|
+| 2026-09-28 | Vago777 | `1de8180` | Catálogo de áreas en base de datos: tabla `areas` con 9 dependencias, CRUD en el panel (`areas.php`) y campo de área de usuarios vinculado por id |
 | 2026-09-21 | Vago777 | `0a0c639` | Commit inicial del sistema InventaPlus: autenticación, CRUD de usuarios/equipos, asignaciones, dashboard y esquema de base de datos |
 | 2026-09-21 | — | `77fdf79` | Initial commit (README del repositorio) |
 
