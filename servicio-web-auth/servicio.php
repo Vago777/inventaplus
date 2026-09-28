@@ -57,11 +57,18 @@ function responder(int $codigo, array $contenido): void
 function conectar(): PDO
 {
     try {
-        $dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NOMBRE . ';charset=utf8mb4';
-        return new PDO($dsn, DB_USUARIO, DB_CLAVE, [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,  // Errores como excepciones.
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,        // Resultados como arreglos asociativos.
-        ]);
+        // Construye la cadena de conexión (DSN) por partes para mejor lectura.
+        $dsn  = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT;
+        $dsn .= ';dbname=' . DB_NOMBRE . ';charset=utf8mb4';
+
+        // Opciones de conexión: errores como excepciones y resultados asociativos.
+        $opciones = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ];
+
+        // Abre la conexión con la base de datos del servicio.
+        return new PDO($dsn, DB_USUARIO, DB_CLAVE, $opciones);
     } catch (PDOException $e) {
         responder(500, ['error' => 'No se pudo conectar con el servicio de datos.']);
     }
