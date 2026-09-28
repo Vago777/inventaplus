@@ -23,7 +23,7 @@ switch($method){
         
         if (isset($_GET['id'])) {
             $id = $_GET['id'];
-            $stmt = $pdo->prepare('SELECT * FROM usuarios WHERE id = ?');
+            $stmt = $pdo->prepare('SELECT u.*, a.nombre AS area FROM usuarios u LEFT JOIN areas a ON a.id = u.area_id WHERE u.id = ?');
             $stmt->execute([$id]);
             $data = $stmt->fetch();
             
@@ -34,7 +34,7 @@ switch($method){
                 echo json_encode(['message' => 'Usuario no encontrado']);
             }
         } else {
-            $stmt = $pdo->prepare('SELECT * FROM usuarios ORDER BY nombre');
+            $stmt = $pdo->prepare('SELECT u.*, a.nombre AS area FROM usuarios u LEFT JOIN areas a ON a.id = u.area_id ORDER BY u.nombre');
             $stmt->execute();
             $data = $stmt->fetchAll();
             echo json_encode($data);
@@ -54,10 +54,23 @@ switch($method){
         $nombre = trim($data['nombre'] ?? '');
         $correo_sena = trim($data['correo_sena'] ?? '');
         $telefono = trim($data['telefono'] ?? '');
-        $area = trim($data['area'] ?? '');
+        $area_id = trim($data['area_id'] ?? '');
 
-        if(empty($identificacion) || empty($nombre) || empty($correo_sena) || empty($telefono) || empty($area)){
+        if(empty($identificacion) || empty($nombre) || empty($correo_sena) || empty($telefono) || empty($area_id)){
             echo json_encode(['message' => 'Todos los campos son obligatorios']);
+            exit;
+        }
+
+        if(!is_numeric($area_id)){
+            echo json_encode(['message' => 'Área no válida']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare('SELECT id FROM areas WHERE id = ?');
+        $stmt->execute([$area_id]);
+        if (!$stmt->fetch()) {
+            http_response_code(400);
+            echo json_encode(['message' => 'El área seleccionada no existe']);
             exit;
         }
 
@@ -77,8 +90,8 @@ switch($method){
             exit;
         }
 
-        $stmt = $pdo->prepare('INSERT INTO usuarios (identificacion, nombre, correo_sena, telefono, area) VALUES (?,?,?,?,?)');
-        $stmt->execute([$identificacion, $nombre, $correo_sena, $telefono, $area]);
+        $stmt = $pdo->prepare('INSERT INTO usuarios (identificacion, nombre, correo_sena, telefono, area_id) VALUES (?,?,?,?,?)');
+        $stmt->execute([$identificacion, $nombre, $correo_sena, $telefono, $area_id]);
 
         echo json_encode(['message' => $stmt->rowCount() > 0 ? 'Registrado' : 'Error al registrar']);
     break;
@@ -97,15 +110,28 @@ switch($method){
         $nombre = trim($data['nombre'] ?? '');
         $correo_sena = trim($data['correo_sena'] ?? '');
         $telefono = trim($data['telefono'] ?? '');
-        $area = trim($data['area'] ?? '');
+        $area_id = trim($data['area_id'] ?? '');
 
         if($id === '' || !is_numeric($id)){
             echo json_encode(['message'=>'ID vacio o Invalido']);
             exit;
         }
 
-        if(empty($identificacion) || empty($nombre) || empty($correo_sena) || empty($telefono) || empty($area)){
+        if(empty($identificacion) || empty($nombre) || empty($correo_sena) || empty($telefono) || empty($area_id)){
             echo json_encode(['message' => 'Todos los campos son obligatorios']);
+            exit;
+        }
+
+        if(!is_numeric($area_id)){
+            echo json_encode(['message' => 'Área no válida']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare('SELECT id FROM areas WHERE id = ?');
+        $stmt->execute([$area_id]);
+        if (!$stmt->fetch()) {
+            http_response_code(400);
+            echo json_encode(['message' => 'El área seleccionada no existe']);
             exit;
         }
 
@@ -125,8 +151,8 @@ switch($method){
             exit;
         }
 
-        $stmt = $pdo->prepare('UPDATE usuarios SET identificacion = ?, nombre = ?, correo_sena = ?, telefono = ?, area = ? WHERE id = ?');
-        $stmt->execute([$identificacion, $nombre, $correo_sena, $telefono, $area, $id]);
+        $stmt = $pdo->prepare('UPDATE usuarios SET identificacion = ?, nombre = ?, correo_sena = ?, telefono = ?, area_id = ? WHERE id = ?');
+        $stmt->execute([$identificacion, $nombre, $correo_sena, $telefono, $area_id, $id]);
         
         echo json_encode(['message' => $stmt->rowCount() > 0 ? 'Actualizado' : 'Error al actualizar']);
     break;

@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupUsuarioForm();      // Formulario CRUD de usuarios
     setupEquipoForm();       // Formulario CRUD de equipos
     setupAsignacionForm();   // Formulario de asignación de equipos
+    setupAreaForm();         // Formulario CRUD de áreas
 });
 
 /* ─── SESIÓN Y NAVEGACIÓN ───────────────────────────────── */
@@ -89,6 +90,7 @@ function setupNavigation() {
                     case 'usuarios': loadUsuarios(); break;
                     case 'equipos': loadEquipos(); break;
                     case 'asignaciones': loadAsignaciones(); break;
+                    case 'areas': loadAreas(); break;
                 }
             }
         });
@@ -313,7 +315,7 @@ function setupUsuarioForm() {
                 nombre: document.getElementById('nombre').value,
                 correo_sena: document.getElementById('correo_sena').value,
                 telefono: document.getElementById('telefono').value,
-                area: document.getElementById('area').value
+                area_id: document.getElementById('area').value
             };
             // Si hay ID cargado se trata de una edición (PUT)
             if (usuarioId) data.id = usuarioId;
@@ -345,11 +347,40 @@ function setupUsuarioForm() {
 
     // Al cerrar el modal se restablece el formulario a modo "nuevo"
     if (modal) {
+        // Cada apertura recarga el catálogo de áreas en el select
+        modal.addEventListener('show.bs.modal', async function() {
+            await loadAreaOptions(areaSelectOverride);
+            areaSelectOverride = null;
+        });
         modal.addEventListener('hidden.bs.modal', function() {
             form.reset();
             document.getElementById('usuarioId').value = '';
             document.getElementById('usuarioModalTitle').textContent = 'Nuevo Usuario';
         });
+    }
+}
+
+// Área preseleccionada al abrir el modal en modo edición (editUsuario)
+let areaSelectOverride = null;
+
+/**
+ * Puebla el selector de área del formulario de usuarios con el
+ * catálogo vigente de la tabla areas. Si se indica un id, lo deja
+ * preseleccionado (modo edición).
+ * @param {number|null} selectedId - id del área a preseleccionar.
+ */
+async function loadAreaOptions(selectedId) {
+    try {
+        const response = await fetch(noCache('areas.php'), fetchOpts);
+        const areas = await response.json();
+        const select = document.getElementById('area');
+        select.innerHTML = '<option value="">Seleccionar...</option>';
+        areas.forEach(a => {
+            select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
+        });
+        if (selectedId) select.value = selectedId;
+    } catch (error) {
+        console.error('Error loading areas:', error);
     }
 }
 
@@ -369,7 +400,8 @@ async function editUsuario(id) {
             document.getElementById('nombre').value = usuario.nombre;
             document.getElementById('correo_sena').value = usuario.correo_sena;
             document.getElementById('telefono').value = usuario.telefono;
-            document.getElementById('area').value = usuario.area;
+            // El select de área se puebla al abrir el modal usando este id
+            areaSelectOverride = usuario.area_id;
             document.getElementById('usuarioModalTitle').textContent = 'Editar Usuario';
             new bootstrap.Modal(document.getElementById('usuarioModal')).show();
         } else {
@@ -684,6 +716,131 @@ async function devolverEquipo(id) {
         }
     } catch (error) {
         console.error('Error returning equipo:', error);
+        showAlert('error', 'Error de conexión');
+    }
+}
+
+/* ─── ÁREAS (catálogo de dependencias) ────────────────────── */
+
+/** Consulta y renderiza el catálogo completo de áreas. */
+async function loadAreas() {
+    try {
+        const response = await fetch(noCache('areas.php'), fetchOpts);
+        const areas = await response.json();
+
+        const rows = areas.map(a => [
+            `<td>${a.id}</td>`,
+            `<td>${a.nombre}</td>`,
+            `<td><span class="badge ${a.estado === 'activo' ? 'bg-success' : 'bg-secondary'}">${a.estado === 'activo' ? 'Activo' : 'Inactivo'}</span></td>`,
+            `<td><button class="btn btn-sm btn-primary" onclick="editArea(${a.id})"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-danger" onclick="deleteArea(${a.id})"><i class="bi bi-trash"></i></button></td>`
+        ]);
+
+        updateTable('#areasTable', rows);
+    } catch (error) {
+        console.error('Error loading areas:', error);
+    }
+}
+
+/**
+ * Configura el formulario modal de áreas: creación (POST) o
+ * edición (PUT) según exista el campo oculto areaId. Limpia el
+ * formulario al cerrar el modal.
+ */
+function setupAreaForm() {
+    const form = document.getElementById('areaForm');
+    const saveBtn = document.getElementById('saveArea');
+    const modal = document.getElementById('areaModal');
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async function() {
+            const areaId = document.getElementById('areaId').value;
+            const data = {
+                nombre: document.getElementById('areaNombre').value,
+                estado: document.getElementById('areaEstado').value
+            };
+            if (areaId) data.id = areaId;
+
+            try {
+                const response = await fetch('areas.php', {
+                    method: areaId ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (response.ok && result.message.includes(areaId ? 'Actualizado' : 'Registrado')) {
+                    showAlert('success', result.message);
+                    const instance = bootstrap.Modal.getInstance(modal);
+                    if (instance) instance.hide();
+                    await loadAreas();
+                    await loadAreaOptions();
+                } else {
+                    showAlert('error', result.message || 'Error al guardar área');
+                }
+            } catch (error) {
+                console.error('Error saving area:', error);
+                showAlert('error', 'Error de conexión');
+            }
+        });
+    }
+
+    // Restablece el formulario a modo "nuevo" al cerrar el modal
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function() {
+            form.reset();
+            document.getElementById('areaId').value = '';
+            document.getElementById('areaModalTitle').textContent = 'Nueva Área';
+        });
+    }
+}
+
+/**
+ * Consulta un área por su id y precarga sus datos en el modal
+ * para su edición.
+ * @param {number} id - Identificador del área a editar.
+ */
+async function editArea(id) {
+    try {
+        const response = await fetch(noCache('areas.php?id=' + id), fetchOpts);
+        const area = await response.json();
+        if (response.ok) {
+            document.getElementById('areaId').value = area.id;
+            document.getElementById('areaNombre').value = area.nombre;
+            document.getElementById('areaEstado').value = area.estado;
+            document.getElementById('areaModalTitle').textContent = 'Editar Área';
+            new bootstrap.Modal(document.getElementById('areaModal')).show();
+        } else {
+            showAlert('error', 'Error al cargar área');
+        }
+    } catch (error) {
+        console.error('Error loading area:', error);
+        showAlert('error', 'Error de conexión');
+    }
+}
+
+/**
+ * Elimina un área previa confirmación. El backend rechaza la
+ * operación si el área tiene usuarios asociados.
+ * @param {number} id - Identificador del área a eliminar.
+ */
+async function deleteArea(id) {
+    if (!confirm('¿Está seguro de eliminar esta área?')) return;
+    try {
+        const response = await fetch('areas.php', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+        const result = await response.json();
+        if (response.ok && result.message.includes('Eliminado')) {
+            showAlert('success', result.message);
+            await loadAreas();
+            await loadAreaOptions();
+        } else {
+            showAlert('error', result.message || 'Error al eliminar área');
+        }
+    } catch (error) {
+        console.error('Error deleting area:', error);
         showAlert('error', 'Error de conexión');
     }
 }

@@ -56,6 +56,11 @@
                                 <i class="bi bi-arrow-left-right me-2"></i> Asignaciones
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="areas">
+                                <i class="bi bi-diagram-3 me-2"></i> Áreas
+                            </a>
+                        </li>
                         <li class="nav-item mt-4">
                             <a class="nav-link text-danger" href="#" id="logoutBtn">
                                 <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
@@ -241,6 +246,36 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Sección Áreas: catálogo de dependencias (CRUD) -->
+                <div id="areas-section" class="content-section hidden">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                        <h1 class="h2">Gestión de Áreas</h1>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#areaModal">
+                            <i class="bi bi-plus-circle me-2"></i>Nueva Área
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="areasTable" class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Content loaded by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -276,7 +311,9 @@
                         </div>
                         <div class="mb-3">
                             <label for="area" class="form-label">Área</label>
-                            <input type="text" class="form-control" id="area" required>
+                            <select class="form-select" id="area" required>
+                                <option value="">Seleccionar...</option>
+                            </select>
                         </div>
                     </form>
                 </div>
@@ -378,6 +415,38 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" id="saveAsignacion">Asignar Equipo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Área: registro y edición del catálogo de dependencias -->
+    <div class="modal fade" id="areaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="areaModalTitle">Nueva Área</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="areaForm">
+                        <input type="hidden" id="areaId">
+                        <div class="mb-3">
+                            <label for="areaNombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="areaNombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="areaEstado" class="form-label">Estado</label>
+                            <select class="form-select" id="areaEstado" required>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveArea">Guardar</button>
                 </div>
             </div>
         </div>

@@ -12,8 +12,19 @@ CREATE DATABASE IF NOT EXISTS inventario
 USE inventario;
 
 -- ------------------------------------------------------------
+-- Tabla: areas
+-- Catálogo de dependencias / áreas funcionales del SENA
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS areas (
+    id     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(60) NOT NULL UNIQUE,
+    estado ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo'
+) ENGINE = InnoDB;
+
+-- ------------------------------------------------------------
 -- Tabla: usuarios
--- Almacena los aprendices / funcionarios del SENA
+-- Almacena los aprendices / funcionarios del SENA.
+-- El área se referencia desde el catálogo areas (por id).
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS usuarios (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -21,7 +32,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nombre          VARCHAR(100) NOT NULL,
     correo_sena     VARCHAR(100) NOT NULL UNIQUE,
     telefono        VARCHAR(15)  NOT NULL,
-    area            VARCHAR(60)  NOT NULL
+    area_id         INT UNSIGNED NOT NULL,
+    CONSTRAINT fk_usuario_area
+        FOREIGN KEY (area_id) REFERENCES areas (id)
 ) ENGINE = InnoDB;
 
 -- ------------------------------------------------------------
@@ -80,9 +93,21 @@ CREATE TABLE IF NOT EXISTS asignaciones (
 -- Datos iniciales
 -- ============================================================
 
+-- Áreas funcionales del SENA (catálogo de dependencias)
+INSERT INTO areas (id, nombre, estado) VALUES
+(1, 'Sistemas',                     'activo'),
+(2, 'Contabilidad',                 'activo'),
+(3, 'SST',                          'activo'),
+(4, 'Talento Humano',               'activo'),
+(5, 'Archivo',                      'activo'),
+(6, 'Grupo Mixto',                  'activo'),
+(7, 'Biblioteca',                   'activo'),
+(8, 'Emprendimiento',               'activo'),
+(9, 'Relaciones Corporativas',      'activo');
+
 -- Usuario administrador del sistema
-INSERT INTO usuarios (identificacion, nombre, correo_sena, telefono, area)
-VALUES ('1090880011', 'Administrador del Sistema', 'admin@sena.edu.co', '3000000000', 'Ambientes de Formación');
+INSERT INTO usuarios (identificacion, nombre, correo_sena, telefono, area_id)
+VALUES ('1090880011', 'Administrador del Sistema', 'admin@sena.edu.co', '3000000000', 1);
 
 -- Usuario administrador. La contraseña inicial se define en config_local.php
 -- o debe cambiarse inmediatamente despues de la primera instalacion.
@@ -90,10 +115,10 @@ INSERT INTO administradores (usuario_id, username, password, estado)
 VALUES (1, 'admin', '$2y$10$d8eeh6nEr9fsQdqrcru2Ke8BuGgkaD4hg/n/L1/KXt/MII/P1.7pS', 'activo');
 
 -- Usuarios de prueba
-INSERT INTO usuarios (identificacion, nombre, correo_sena, telefono, area) VALUES
-('1020304050', 'Ana María Gómez',   'anagomez@sena.edu.co',  '3111111111', 'Software'),
-('1098765432', 'Carlos Andrés Ruiz','caruiz@sena.edu.co',    '3222222222', 'Redes'),
-('53123456',   'Laura Sofía Pérez', 'lperez@sena.edu.co',    '3333333333', 'Electrónica');
+INSERT INTO usuarios (identificacion, nombre, correo_sena, telefono, area_id) VALUES
+('1020304050', 'Ana María Gómez',   'anagomez@sena.edu.co',  '3111111111', 1),
+('1098765432', 'Carlos Andrés Ruiz','caruiz@sena.edu.co',    '3222222222', 4),
+('53123456',   'Laura Sofía Pérez', 'lperez@sena.edu.co',    '3333333333', 7);
 
 -- Equipos de prueba
 INSERT INTO equipos (tipo_equipo, serial, placa, tiene_mouse, tiene_teclado, tiene_cargador, tiene_rj45_tipo_c, estado) VALUES
