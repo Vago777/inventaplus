@@ -1,0 +1,213 @@
+{
+  "info": {
+    "name": "API InventaPlus - GA7-220501096-AA5-EV03",
+    "description": "Coleccion de servicios web del proyecto InventaPlus: autenticacion, areas, usuarios, equipos, asignaciones y resumen. Base: {{base_url}}/api.php?ruta=",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8090" }
+  ],
+  "item": [
+    {
+      "name": "Autenticacion",
+      "item": [
+        {
+          "name": "Login - credenciales correctas",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('HTTP 200', () => pm.response.to.have.status(200));", "pm.test('Autenticacion satisfactoria', () => pm.expect(pm.response.json().mensaje).to.eql('Autenticación satisfactoria'));"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=login", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "login" }] },
+            "description": "Valida las credenciales del administrador. Responde 200 con los datos del usuario autenticado."
+          }
+        },
+        {
+          "name": "Login - clave incorrecta",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"clave-mala\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=login", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "login" }] },
+            "description": "Credenciales inválidas: responde 401 Credenciales incorrectas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resumen",
+      "item": [
+        {
+          "name": "Resumen del panel general",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=resumen", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "resumen" }] },
+            "description": "Conteos de usuarios, áreas, equipos y asignaciones activas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Areas",
+      "item": [
+        {
+          "name": "Listar areas",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
+            "description": "Lista las áreas con la cantidad de usuarios de cada una."
+          }
+        },
+        {
+          "name": "Crear area",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Comercializacion\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
+            "description": "Crea un área. Responde 201 con el id generado."
+          }
+        },
+        {
+          "name": "Actualizar area",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 10,\n  \"nombre\": \"Comercializacion y Ventas\",\n  \"estado\": \"activo\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
+            "description": "Actualiza el nombre y el estado de un área."
+          }
+        },
+        {
+          "name": "Eliminar area",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 10\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
+            "description": "Elimina un área. Responde 409 si tiene usuarios asociados."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Lista los usuarios con el nombre de su área."
+          }
+        },
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"identificacion\": \"900112233\",\n  \"nombre\": \"Prueba API EV03\",\n  \"correo_sena\": \"prueba.ev03@sena.edu.co\",\n  \"telefono\": \"3177777777\",\n  \"area_id\": 2\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Crea un usuario. El area_id debe existir en el catálogo de áreas."
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 5,\n  \"identificacion\": \"900112233\",\n  \"nombre\": \"Prueba API EV03 Actualizada\",\n  \"correo_sena\": \"prueba.ev03@sena.edu.co\",\n  \"telefono\": \"3177777777\",\n  \"area_id\": 4\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Actualiza los datos de un usuario existente."
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 5\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Elimina un usuario. Responde 409 si tiene asignaciones registradas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Equipos",
+      "item": [
+        {
+          "name": "Listar equipos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Lista el inventario de equipos con su estado y si están asignados."
+          }
+        },
+        {
+          "name": "Crear equipo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo_equipo\": \"portatil\",\n  \"serial\": \"SN-EV03-001\",\n  \"placa\": \"PL-9001\",\n  \"tiene_mouse\": 1,\n  \"tiene_teclado\": 1,\n  \"tiene_cargador\": 1,\n  \"tiene_rj45_tipo_c\": 0,\n  \"estado\": \"disponible\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Registra un equipo en el inventario."
+          }
+        },
+        {
+          "name": "Actualizar equipo",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 5,\n  \"tipo_equipo\": \"portatil\",\n  \"serial\": \"SN-EV03-001\",\n  \"placa\": \"PL-9001\",\n  \"tiene_mouse\": 0,\n  \"tiene_teclado\": 1,\n  \"tiene_cargador\": 1,\n  \"tiene_rj45_tipo_c\": 0,\n  \"estado\": \"mantenimiento\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Actualiza los datos o el estado de un equipo."
+          }
+        },
+        {
+          "name": "Eliminar equipo",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 5\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Elimina un equipo. Responde 409 si tiene asignaciones registradas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Asignaciones",
+      "item": [
+        {
+          "name": "Listar asignaciones",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }] },
+            "description": "Lista las asignaciones con el usuario, el equipo y el administrador."
+          }
+        },
+        {
+          "name": "Asignar equipo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"usuario_id\": 5,\n  \"equipo_id\": 5,\n  \"admin_id\": 1\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }] },
+            "description": "Asigna un equipo disponible a un usuario. Responde 409 si el equipo no está disponible."
+          }
+        },
+        {
+          "name": "Devolver equipo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones&op=devolver", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }, { "key": "op", "value": "devolver" }] },
+            "description": "Registra la devolución del equipo y lo deja disponible."
+          }
+        }
+      ]
+    }
+  ]
+}
