@@ -13,6 +13,7 @@ Commits:          b539e14 - Agrega API de servicios web del proyecto InventaPlus
                   bab7a93 - Sanitize credentials in docs and add repository link file
                   569ac7e - Actualiza enlace del repositorio con el commit final
                   2c07610 - Enlace final y referencias de la evidencia EV03
+                  5e6192d - Agrega pruebas de las API con Postman para la evidencia EV04
 
 ARCHIVOS DEL PROYECTO PUBLICADOS
 servicio-web/api.php                                 Punto de entrada y router de la API
