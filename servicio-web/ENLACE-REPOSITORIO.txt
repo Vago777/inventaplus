@@ -7,13 +7,15 @@ https://github.com/Vago777/inventaplus
 
 Rama:             main
 Carpeta proyecto: servicio-web/
-Commit de la API: b539e14 - Agrega API de servicios web del proyecto InventaPlus
+Commits:          b539e14 - Agrega API de servicios web del proyecto InventaPlus
+                  bab7a93 - Sanitize credentials in docs and add repository link file
 
 ARCHIVOS DEL PROYECTO PUBLICADOS
-servicio-web/api.php                              Punto de entrada y router de la API
-servicio-web/db.php                               Conexion PDO con la base de datos
+servicio-web/api.php                                 Punto de entrada y router de la API
+servicio-web/db.php                                  Conexion PDO con la base de datos
 servicio-web/api-inventaplus.postman_collection.json  Coleccion de Postman (18 servicios)
-servicio-web/README.md                            Instrucciones de ejecucion y servicios
+servicio-web/README.md                               Instrucciones de ejecucion y servicios
+servicio-web/ENLACE-REPOSITORIO.txt                  Este archivo
 
 NOTAS
 - El proyecto se creo con Git (control de versiones local) y se publico
@@ -21,3 +23,4 @@ NOTAS
 - Para ejecutar la API: php -S 127.0.0.1:8090 -t servicio-web
 - Base de datos del proyecto: inventario (database/inventario.sql)
 - Las credenciales del administrador no se publican en el repositorio.
+- La coleccion de Postman usa las variables {{usuario_admin}} y {{clave_admin}}.
