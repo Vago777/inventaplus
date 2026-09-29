@@ -5,7 +5,9 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://127.0.0.1:8090" }
+    { "key": "base_url", "value": "http://127.0.0.1:8090" },
+    { "key": "usuario_admin", "value": "admin" },
+    { "key": "clave_admin", "value": "<CLAVE_ADMIN>" }
   ],
   "item": [
     {
@@ -17,9 +19,9 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{usuario_admin}}\",\n  \"password\": \"{{clave_admin}}\"\n}" },
             "url": { "raw": "{{base_url}}/api.php?ruta=login", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "login" }] },
-            "description": "Valida las credenciales del administrador. Responde 200 con los datos del usuario autenticado."
+            "description": "Valida las credenciales del administrador. Antes de ejecutar, configure la variable de entorno clave_admin con la clave de su instalacion local. Responde 200 con los datos del usuario autenticado."
           }
         },
         {
@@ -27,7 +29,7 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"clave-mala\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{usuario_admin}}\",\n  \"password\": \"clave-incorrecta\"\n}" },
             "url": { "raw": "{{base_url}}/api.php?ruta=login", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "login" }] },
             "description": "Credenciales inválidas: responde 401 Credenciales incorrectas."
           }

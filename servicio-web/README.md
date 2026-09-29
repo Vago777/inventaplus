@@ -51,10 +51,14 @@ php -S 127.0.0.1:8090 -t servicio-web
 
 ### Ejemplo
 
+Las credenciales se toman del administrador registrado en la base de datos del
+proyecto; no se almacenan en el repositorio. Reemplace los valores de ejemplo por
+los de su instalación local:
+
 ```bash
 curl "http://127.0.0.1:8090/api.php?ruta=login" -X POST ^
   -H "Content-Type: application/json" ^
-  -d "{\"username\":\"admin\",\"password\":\"admin123\"}"
+  -d "{\"username\":\"<USUARIO_ADMIN>\",\"password\":\"<CLAVE_ADMIN>\"}"
 ```
 
 ## Repositorio
