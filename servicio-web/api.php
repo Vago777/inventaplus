@@ -235,6 +235,9 @@ function servicioAreas(PDO $pdo, string $metodo, array $datos): void
                 responder(404, ['ok' => false, 'error' => 'El área no existe.']);
             }
             responder(200, ['ok' => true, 'mensaje' => 'Área eliminada correctamente.']);
+
+        default:
+            responder(405, ['ok' => false, 'error' => 'Método no permitido para el servicio areas.']);
     }
 }
 
@@ -320,6 +323,9 @@ function servicioUsuarios(PDO $pdo, string $metodo, array $datos): void
                 responder(404, ['ok' => false, 'error' => 'El usuario no existe.']);
             }
             responder(200, ['ok' => true, 'mensaje' => 'Usuario eliminado correctamente.']);
+
+        default:
+            responder(405, ['ok' => false, 'error' => 'Método no permitido para el servicio usuarios.']);
     }
 }
 
@@ -430,6 +436,9 @@ function servicioEquipos(PDO $pdo, string $metodo, array $datos): void
                 responder(404, ['ok' => false, 'error' => 'El equipo no existe.']);
             }
             responder(200, ['ok' => true, 'mensaje' => 'Equipo eliminado correctamente.']);
+
+        default:
+            responder(405, ['ok' => false, 'error' => 'Método no permitido para el servicio equipos.']);
     }
 }
 
@@ -524,6 +533,9 @@ function servicioAsignaciones(PDO $pdo, array $datos): void
                 ->execute([':id' => $equipoId]);
 
             responder(201, ['ok' => true, 'mensaje' => 'Equipo asignado correctamente.', 'id' => $idAsignacion]);
+
+        default:
+            responder(405, ['ok' => false, 'error' => 'Método no permitido para el servicio asignaciones.']);
     }
 }
 

@@ -1,0 +1,291 @@
+================================================================================
+API INVENTAPLUS - ARCHIVO DE ENDPOINTS
+Evidencia: GA7-220501096-AA5-EV04 - API del proyecto (Pruebas con Postman)
+================================================================================
+
+PROYECTO   : InventaPlus - Sistema de gestion de equipos
+REPOSITORIO: https://github.com/Vago777/inventaplus
+TECNOLOGIAS: PHP 8 (PDO) + MySQL/MariaDB (base de datos: inventario)
+
+--------------------------------------------------------------------------------
+1. CONFIGURACION
+--------------------------------------------------------------------------------
+
+Base URL (servidor local de desarrollo)   : http://127.0.0.1:8090
+Punto de entrada de la API                 : http://127.0.0.1:8090/api.php
+Formato de las peticiones y respuestas     : JSON (application/json; charset=utf-8)
+Formato de las credenciales en Postman    : Body > raw > JSON
+Variable de entorno                        : {{base_url}} = http://127.0.0.1:8090
+
+Comando para levantar la API:
+    php -S 127.0.0.1:8090 -t servicio-web
+
+--------------------------------------------------------------------------------
+2. TABLA RESUMEN DE ENDPOINTS
+--------------------------------------------------------------------------------
+
+| #  | Metodo | Ruta (endpoint)                | Servicio       | Descripcion                          |
+|----|--------|--------------------------------|----------------|--------------------------------------|
+| 1  | POST   | /api.php?ruta=login            | Autenticacion  | Valida las credenciales del admin    |
+| 2  | GET    | /api.php?ruta=resumen          | Resumen        | Conteos del panel general            |
+| 3  | GET    | /api.php?ruta=areas            | Areas          | Lista las areas y sus usuarios       |
+| 4  | POST   | /api.php?ruta=areas            | Areas          | Crea un area                         |
+| 5  | PUT    | /api.php?ruta=areas            | Areas          | Actualiza un area                    |
+| 6  | DELETE | /api.php?ruta=areas            | Areas          | Elimina un area sin usuarios         |
+| 7  | GET    | /api.php?ruta=usuarios         | Usuarios       | Lista los usuarios y su area         |
+| 8  | POST   | /api.php?ruta=usuarios         | Usuarios       | Crea un usuario                      |
+| 9  | PUT    | /api.php?ruta=usuarios         | Usuarios       | Actualiza un usuario                 |
+| 10 | DELETE | /api.php?ruta=usuarios         | Usuarios       | Elimina un usuario sin asignaciones  |
+| 11 | GET    | /api.php?ruta=equipos          | Equipos        | Lista el inventario de equipos       |
+| 12 | POST   | /api.php?ruta=equipos          | Equipos        | Registra un equipo                   |
+| 13 | PUT    | /api.php?ruta=equipos          | Equipos        | Actualiza un equipo                  |
+| 14 | DELETE | /api.php?ruta=equipos          | Equipos        | Elimina un equipo sin asignaciones   |
+| 15 | GET    | /api.php?ruta=asignaciones     | Asignaciones   | Lista las asignaciones              |
+| 16 | POST   | /api.php?ruta=asignaciones     | Asignaciones   | Asigna un equipo a un usuario        |
+| 17 | POST   | /api.php?ruta=asignaciones&op=devolver | Asignaciones | Registra la devolucion        |
+
+--------------------------------------------------------------------------------
+3. DESCRIPCION DE CADA ENDPOINT
+--------------------------------------------------------------------------------
+
+[1] POST /api.php?ruta=login
+    Servicio   : Autenticacion de administradores
+    Headers    : Content-Type: application/json
+    Body       : { "username": "<USUARIO>", "password": "<CLAVE>" }
+    Resp 200   : { "ok": true, "mensaje": "Autenticacion satisfactoria",
+                   "usuario": { "admin_id": 1, "username": "admin",
+                                "nombre": "...", "area_id": 1 } }
+    Resp 400   : { "ok": false, "error": "El nombre de usuario y la clave son obligatorios." }
+    Resp 401   : { "ok": false, "error": "Credenciales incorrectas." }
+    Resp 405   : { "ok": false, "error": "Metodo no permitido para el servicio login." }
+
+[2] GET /api.php?ruta=resumen
+    Servicio   : Indicadores del panel general
+    Resp 200   : { "ok": true, "resumen": { "usuarios": 4, "administradores": 1,
+                   "areas": 9, "equipos": 4, "equipos_disponibles": 3,
+                   "equipos_asignados": 0, "equipos_mantenimiento": 1,
+                   "asignaciones_activas": 0 } }
+
+[3] GET /api.php?ruta=areas
+    Servicio   : Listar areas
+    Resp 200   : { "ok": true, "datos": [ { "id": 1, "nombre": "...",
+                   "estado": "activo", "usuarios": 2 } ] }
+
+[4] POST /api.php?ruta=areas
+    Servicio   : Crear area
+    Headers    : Content-Type: application/json
+    Body       : { "nombre": "Comercializacion" }
+    Resp 201   : { "ok": true, "mensaje": "Area creada correctamente.", "id": 10 }
+    Resp 400   : { "ok": false, "error": "El nombre del area es obligatorio." }
+
+[5] PUT /api.php?ruta=areas
+    Servicio   : Actualizar area
+    Headers    : Content-Type: application/json
+    Body       : { "id": 10, "nombre": "Comercializacion y Ventas", "estado": "activo" }
+    Resp 200   : { "ok": true, "mensaje": "Area actualizada correctamente." }
+    Resp 400   : { "ok": false, "error": "id y nombre son obligatorios." }
+    Resp 400   : { "ok": false, "error": "El estado debe ser activo o inactivo." }
+    Resp 404   : { "ok": false, "error": "El area no existe o no cambio." }
+    Resp 405   : { "ok": false, "error": "Metodo no permitido para el servicio areas." }
+
+[6] DELETE /api.php?ruta=areas
+    Servicio   : Eliminar area
+    Headers    : Content-Type: application/json
+    Body       : { "id": 10 }
+    Resp 200   : { "ok": true, "mensaje": "Area eliminada correctamente." }
+    Resp 400   : { "ok": false, "error": "El id es obligatorio." }
+    Resp 404   : { "ok": false, "error": "El area no existe." }
+    Resp 409   : { "ok": false, "error": "No se puede eliminar: el area tiene usuarios asociados." }
+
+[7] GET /api.php?ruta=usuarios
+    Servicio   : Listar usuarios
+    Resp 200   : { "ok": true, "datos": [ { "id": 1, "identificacion": "...",
+                   "nombre": "...", "correo_sena": "...", "telefono": "...",
+                   "area_id": 1, "area": "..." } ] }
+
+[8] POST /api.php?ruta=usuarios
+    Servicio   : Crear usuario
+    Headers    : Content-Type: application/json
+    Body       : { "identificacion": "900112233", "nombre": "Usuario de prueba",
+                   "correo_sena": "prueba@sena.edu.co", "telefono": "3177777777",
+                   "area_id": 2 }
+    Resp 201   : { "ok": true, "mensaje": "Usuario creado correctamente.", "id": 5 }
+    Resp 400   : { "ok": false, "error": "identificacion, nombre, correo_sena, telefono y area_id son obligatorios." }
+    Resp 404   : { "ok": false, "error": "El area indicada no existe." }
+    Resp 409   : { "ok": false, "error": "La operacion viola una restriccion de la base de datos..." }
+
+[9] PUT /api.php?ruta=usuarios
+    Servicio   : Actualizar usuario
+    Headers    : Content-Type: application/json
+    Body       : { "id": 5, "identificacion": "900112233", "nombre": "Usuario actualizado",
+                   "correo_sena": "prueba@sena.edu.co", "telefono": "3178888888",
+                   "area_id": 4 }
+    Resp 200   : { "ok": true, "mensaje": "Usuario actualizado correctamente." }
+    Resp 400   : { "ok": false, "error": "Todos los campos son obligatorios (incluido id)." }
+    Resp 404   : { "ok": false, "error": "El usuario no existe." }
+    Resp 404   : { "ok": false, "error": "El area indicada no existe." }
+    Resp 405   : { "ok": false, "error": "Metodo no permitido para el servicio usuarios." }
+
+[10] DELETE /api.php?ruta=usuarios
+     Servicio   : Eliminar usuario
+     Headers    : Content-Type: application/json
+     Body       : { "id": 5 }
+     Resp 200   : { "ok": true, "mensaje": "Usuario eliminado correctamente." }
+     Resp 400   : { "ok": false, "error": "El id es obligatorio." }
+     Resp 404   : { "ok": false, "error": "El usuario no existe." }
+     Resp 409   : { "ok": false, "error": "No se puede eliminar: el usuario tiene asignaciones registradas." }
+
+[11] GET /api.php?ruta=equipos
+     Servicio   : Listar equipos
+     Resp 200   : { "ok": true, "datos": [ { "id": 1, "tipo_equipo": "equipo_mesa",
+                    "serial": "...", "placa": "...", "tiene_mouse": 1,
+                    "tiene_teclado": 1, "tiene_cargador": 1, "tiene_rj45_tipo_c": 0,
+                    "estado": "disponible", "asignado": 0 } ] }
+
+[12] POST /api.php?ruta=equipos
+     Servicio   : Crear equipo
+     Headers    : Content-Type: application/json
+     Body       : { "tipo_equipo": "portatil", "serial": "SN-EV04-001",
+                    "placa": "PL-EV04-01", "tiene_mouse": 1, "tiene_teclado": 1,
+                    "tiene_cargador": 1, "tiene_rj45_tipo_c": 0, "estado": "disponible" }
+     Resp 201   : { "ok": true, "mensaje": "Equipo creado correctamente.", "id": 5 }
+     Resp 400   : { "ok": false, "error": "tipo_equipo, serial y placa son obligatorios." }
+     Resp 400   : { "ok": false, "error": "tipo_equipo debe ser equipo_mesa o portatil." }
+     Resp 400   : { "ok": false, "error": "estado debe ser disponible, asignado o mantenimiento." }
+     Resp 409   : { "ok": false, "error": "La operacion viola una restriccion de la base de datos..." }
+
+[13] PUT /api.php?ruta=equipos
+     Servicio   : Actualizar equipo
+     Headers    : Content-Type: application/json
+     Body       : { "id": 5, "tipo_equipo": "portatil", "serial": "SN-EV04-001",
+                    "placa": "PL-EV04-01", "tiene_mouse": 0, "tiene_teclado": 1,
+                    "tiene_cargador": 1, "tiene_rj45_tipo_c": 0, "estado": "mantenimiento" }
+     Resp 200   : { "ok": true, "mensaje": "Equipo actualizado correctamente." }
+     Resp 400   : { "ok": false, "error": "Todos los campos son obligatorios (incluido id)." }
+     Resp 404   : { "ok": false, "error": "El equipo no existe." }
+     Resp 405   : { "ok": false, "error": "Metodo no permitido para el servicio equipos." }
+
+[14] DELETE /api.php?ruta=equipos
+     Servicio   : Eliminar equipo
+     Headers    : Content-Type: application/json
+     Body       : { "id": 5 }
+     Resp 200   : { "ok": true, "mensaje": "Equipo eliminado correctamente." }
+     Resp 400   : { "ok": false, "error": "El id es obligatorio." }
+     Resp 404   : { "ok": false, "error": "El equipo no existe." }
+     Resp 409   : { "ok": false, "error": "No se puede eliminar: el equipo tiene asignaciones registradas." }
+
+[15] GET /api.php?ruta=asignaciones
+     Servicio   : Listar asignaciones
+     Resp 200   : { "ok": true, "datos": [ { "id": 1, "estado_asignacion": "activa",
+                    "fecha_asignacion": "...", "fecha_devolucion": null,
+                    "usuario": "...", "identificacion": "...",
+                    "placa": "...", "serial": "...", "administrador": "..." } ] }
+
+[16] POST /api.php?ruta=asignaciones
+     Servicio   : Asignar un equipo a un usuario
+     Headers    : Content-Type: application/json
+     Body       : { "usuario_id": 5, "equipo_id": 5, "admin_id": 1 }
+     Resp 201   : { "ok": true, "mensaje": "Equipo asignado correctamente.", "id": 1 }
+     Resp 400   : { "ok": false, "error": "usuario_id, equipo_id y admin_id son obligatorios." }
+     Resp 404   : { "ok": false, "error": "El usuario no existe." }
+     Resp 404   : { "ok": false, "error": "El equipo no existe." }
+     Resp 409   : { "ok": false, "error": "El equipo no esta disponible para asignacion." }
+     Resp 405   : { "ok": false, "error": "Metodo no permitido para el servicio asignaciones." }
+
+[17] POST /api.php?ruta=asignaciones&op=devolver
+     Servicio   : Registrar la devolucion de un equipo
+     Headers    : Content-Type: application/json
+     Body       : { "id": 1 }
+     Resp 200   : { "ok": true, "mensaje": "Equipo devuelto correctamente." }
+     Resp 400   : { "ok": false, "error": "El id de la asignacion es obligatorio." }
+     Resp 409   : { "ok": false, "error": "La asignacion no existe o ya fue devuelta." }
+
+--------------------------------------------------------------------------------
+4. CODIGOS DE ESTADO UTILIZADOS
+--------------------------------------------------------------------------------
+
+| Codigo | Significado en la API                                        |
+|--------|--------------------------------------------------------------|
+| 200    | La operacion se realizo correctamente                         |
+| 201    | El recurso fue creado correctamente                            |
+| 400    | Faltan datos o un valor no cumple las validaciones            |
+| 401    | Credenciales incorrectas                                       |
+| 404    | El recurso o la ruta solicitada no existe                     |
+| 405    | El metodo HTTP no esta permitido para ese servicio             |
+| 409    | Conflicto: dato duplicado o registro con relaciones asociadas  |
+| 500    | Error interno del servicio                                     |
+
+--------------------------------------------------------------------------------
+5. EJEMPLOS EN FORMATO cURL
+--------------------------------------------------------------------------------
+
+curl -X POST "http://127.0.0.1:8090/api.php?ruta=login" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"<USUARIO>\",\"password\":\"<CLAVE>\"}"
+
+curl "http://127.0.0.1:8090/api.php?ruta=resumen"
+
+curl "http://127.0.0.1:8090/api.php?ruta=areas"
+
+curl -X POST "http://127.0.0.1:8090/api.php?ruta=areas" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"nombre\":\"Comercializacion\"}"
+
+curl -X PUT "http://127.0.0.1:8090/api.php?ruta=areas" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"id\":10,\"nombre\":\"Comercializacion y Ventas\",\"estado\":\"activo\"}"
+
+curl -X DELETE "http://127.0.0.1:8090/api.php?ruta=areas" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"id\":10}"
+
+curl "http://127.0.0.1:8090/api.php?ruta=usuarios"
+
+curl -X POST "http://127.0.0.1:8090/api.php?ruta=usuarios" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"identificacion\":\"900112233\",\"nombre\":\"Usuario de prueba\",\"correo_sena\":\"prueba@sena.edu.co\",\"telefono\":\"3177777777\",\"area_id\":2}"
+
+curl -X PUT "http://127.0.0.1:8090/api.php?ruta=usuarios" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"id\":5,\"identificacion\":\"900112233\",\"nombre\":\"Usuario actualizado\",\"correo_sena\":\"prueba@sena.edu.co\",\"telefono\":\"3178888888\",\"area_id\":4}"
+
+curl -X DELETE "http://127.0.0.1:8090/api.php?ruta=usuarios" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"id\":5}"
+
+curl "http://127.0.0.1:8090/api.php?ruta=equipos"
+
+curl -X POST "http://127.0.0.1:8090/api.php?ruta=equipos" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"tipo_equipo\":\"portatil\",\"serial\":\"SN-EV04-001\",\"placa\":\"PL-EV04-01\",\"tiene_mouse\":1,\"tiene_teclado\":1,\"tiene_cargador\":1,\"tiene_rj45_tipo_c\":0,\"estado\":\"disponible\"}"
+
+curl -X PUT "http://127.0.0.1:8090/api.php?ruta=equipos" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"id\":5,\"tipo_equipo\":\"portatil\",\"serial\":\"SN-EV04-001\",\"placa\":\"PL-EV04-01\",\"tiene_mouse\":0,\"tiene_teclado\":1,\"tiene_cargador\":1,\"tiene_rj45_tipo_c\":0,\"estado\":\"mantenimiento\"}"
+
+curl -X DELETE "http://127.0.0.1:8090/api.php?ruta=equipos" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"id\":5}"
+
+curl "http://127.0.0.1:8090/api.php?ruta=asignaciones"
+
+curl -X POST "http://127.0.0.1:8090/api.php?ruta=asignaciones" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"usuario_id\":5,\"equipo_id\":5,\"admin_id\":1}"
+
+curl -X POST "http://127.0.0.1:8090/api.php?ruta=asignaciones&op=devolver" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"id\":1}"
+
+--------------------------------------------------------------------------------
+6. COLECCION DE POSTMAN ASOCIADA
+--------------------------------------------------------------------------------
+
+Archivo   : servicio-web/api-inventaplus.postman_collection.json
+Contenido  : 7 grupos y 39 peticiones, cada una con su script de pruebas (pm.test)
+Ejecucion  : Collection Runner > Run collection (deja seleccionada toda la coleccion)
+Variables  : base_url, usuario_admin, clave_admin
+             Las variables id_area, id_usuario, id_equipo, id_asignacion e id_admin
+             las captura la propia coleccion durante la ejecucion.
+Limpieza  : servicio-web/limpiar-datos-prueba.sql
+================================================================================

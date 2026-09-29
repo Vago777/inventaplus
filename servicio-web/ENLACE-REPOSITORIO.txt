@@ -1,6 +1,8 @@
 Proyecto:  API de servicios web - InventaPlus
 Evidencia: GA7-220501096-AA5-EV03
-          Diseno y desarrollo de servicios web - proyecto
+           Diseno y desarrollo de servicios web - proyecto
+           GA7-220501096-AA5-EV04
+           Pruebas de las API con Postman - proyecto
 
 REPOSITORIO REMOTO
 https://github.com/Vago777/inventaplus
@@ -10,12 +12,15 @@ Carpeta proyecto: servicio-web/
 Commits:          b539e14 - Agrega API de servicios web del proyecto InventaPlus
                   bab7a93 - Sanitize credentials in docs and add repository link file
                   569ac7e - Actualiza enlace del repositorio con el commit final
+                  2c07610 - Enlace final y referencias de la evidencia EV03
 
 ARCHIVOS DEL PROYECTO PUBLICADOS
 servicio-web/api.php                                 Punto de entrada y router de la API
 servicio-web/db.php                                  Conexion PDO con la base de datos
-servicio-web/api-inventaplus.postman_collection.json  Coleccion de Postman (18 servicios)
-servicio-web/README.md                               Instrucciones de ejecucion y servicios
+servicio-web/api-inventaplus.postman_collection.json  Coleccion de Postman (39 peticiones, 7 grupos, 139 aserciones)
+servicio-web/limpiar-datos-prueba.sql                Limpieza de los datos creados por las pruebas
+servicio-web/endpoints/API-ENDPOINTS.txt              Documentacion de los 17 endpoints
+servicio-web/README.md                               Instrucciones de ejecucion, servicios y pruebas
 servicio-web/ENLACE-REPOSITORIO.txt                  Este archivo
 
 NOTAS
@@ -24,4 +29,9 @@ NOTAS
 - Para ejecutar la API: php -S 127.0.0.1:8090 -t servicio-web
 - Base de datos del proyecto: inventario (database/inventario.sql)
 - Las credenciales del administrador no se publican en el repositorio.
-- La coleccion de Postman usa las variables {{usuario_admin}} y {{clave_admin}}.
+- La coleccion de Postman usa las variables {{usuario_admin}} y {{clave_admin}};
+  la clave se configura localmente en el entorno de Postman.
+- Resultado de la ejecucion completa: 39/39 peticiones y 139/139 aserciones
+  correctas, sin fallos.
+- Despues de las pruebas se ejecuta:
+  mysql -u root < servicio-web/limpiar-datos-prueba.sql

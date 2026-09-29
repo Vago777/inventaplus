@@ -1,212 +1,954 @@
 {
   "info": {
-    "name": "API InventaPlus - GA7-220501096-AA5-EV03",
-    "description": "Coleccion de servicios web del proyecto InventaPlus: autenticacion, areas, usuarios, equipos, asignaciones y resumen. Base: {{base_url}}/api.php?ruta=",
+    "name": "API InventaPlus - GA7-220501096-AA5-EV04 - Pruebas con Postman",
+    "description": "Coleccion de pruebas de los servicios web del proyecto InventaPlus. Ejecutar con el Collection Runner de Postman respetando el orden numerado 01-39 en que aparecen las peticiones. Antes de ejecutar configure la variable de entorno clave_admin con la clave del administrador del proyecto.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://127.0.0.1:8090" },
-    { "key": "usuario_admin", "value": "admin" },
-    { "key": "clave_admin", "value": "<CLAVE_ADMIN>" }
+    { "key": "base_url", "value": "http://127.0.0.1:8090", "type": "string" },
+    { "key": "usuario_admin", "value": "admin", "type": "string" },
+    { "key": "clave_admin", "value": "<CLAVE_ADMIN>", "type": "string" },
+    { "key": "id_area", "value": "0", "type": "string" },
+    { "key": "id_usuario", "value": "0", "type": "string" },
+    { "key": "id_equipo", "value": "0", "type": "string" },
+    { "key": "id_asignacion", "value": "0", "type": "string" },
+    { "key": "id_admin", "value": "0", "type": "string" }
   ],
   "item": [
     {
-      "name": "Autenticacion",
+      "name": "1. Autenticacion",
       "item": [
         {
-          "name": "Login - credenciales correctas",
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('HTTP 200', () => pm.response.to.have.status(200));", "pm.test('Autenticacion satisfactoria', () => pm.expect(pm.response.json().mensaje).to.eql('Autenticación satisfactoria'));"], "type": "text/javascript" } }],
+          "name": "01 - Login credenciales correctas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - autenticacion aceptada', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta en formato JSON', function () { pm.response.to.be.json; });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('mensaje = Autenticacion satisfactoria', function () { pm.expect(pm.response.json().mensaje).to.eql('Autenticación satisfactoria'); });",
+                  "pm.test('Devuelve los datos del administrador', function () { pm.expect(pm.response.json().usuario.admin_id).to.be.above(0); });",
+                  "pm.collectionVariables.set('id_admin', pm.response.json().usuario.admin_id);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{usuario_admin}}\",\n  \"password\": \"{{clave_admin}}\"\n}" },
             "url": { "raw": "{{base_url}}/api.php?ruta=login", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "login" }] },
-            "description": "Valida las credenciales del administrador. Antes de ejecutar, configure la variable de entorno clave_admin con la clave de su instalacion local. Responde 200 con los datos del usuario autenticado."
+            "description": "Camino feliz del servicio de autenticacion. Valida las credenciales del administrador y devuelve su informacion."
           }
         },
         {
-          "name": "Login - clave incorrecta",
+          "name": "02 - Login clave incorrecta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 401 - clave incorrecta', function () { pm.response.to.have.status(401); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = Credenciales incorrectas', function () { pm.expect(pm.response.json().error).to.eql('Credenciales incorrectas.'); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{usuario_admin}}\",\n  \"password\": \"clave-incorrecta\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{usuario_admin}}\",\n  \"password\": \"clave-inexistente\"\n}" },
             "url": { "raw": "{{base_url}}/api.php?ruta=login", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "login" }] },
-            "description": "Credenciales inválidas: responde 401 Credenciales incorrectas."
-          }
-        }
-      ]
-    },
-    {
-      "name": "Resumen",
-      "item": [
-        {
-          "name": "Resumen del panel general",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{base_url}}/api.php?ruta=resumen", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "resumen" }] },
-            "description": "Conteos de usuarios, áreas, equipos y asignaciones activas."
-          }
-        }
-      ]
-    },
-    {
-      "name": "Areas",
-      "item": [
-        {
-          "name": "Listar areas",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
-            "description": "Lista las áreas con la cantidad de usuarios de cada una."
+            "description": "Prueba negativa: la contrasena no corresponde al usuario."
           }
         },
         {
-          "name": "Crear area",
+          "name": "03 - Login sin contrasena",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 400 - datos incompletos', function () { pm.response.to.have.status(400); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = datos obligatorios', function () { pm.expect(pm.response.json().error).to.eql('El nombre de usuario y la clave son obligatorios.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{usuario_admin}}\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=login", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "login" }] },
+            "description": "Validacion de datos: el cuerpo no incluye la clave."
+          }
+        },
+        {
+          "name": "04 - Login con metodo GET no permitido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 405 - metodo no permitido', function () { pm.response.to.have.status(405); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = metodo no permitido', function () { pm.expect(pm.response.json().error).to.eql('Método no permitido para el servicio login.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=login", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "login" }] },
+            "description": "Prueba de robustez: el servicio login solo admite POST."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Resumen",
+      "item": [
+        {
+          "name": "05 - Resumen del panel general",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - indicadores del panel', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('Devuelve los 8 indicadores del panel', function () { pm.expect(Object.keys(pm.response.json().resumen).length).to.eql(8); });",
+                  "pm.test('Total de usuarios es un numero', function () { pm.expect(pm.response.json().resumen.usuarios).to.be.a('number'); });",
+                  "pm.test('Equipos disponibles es un numero', function () { pm.expect(pm.response.json().resumen.equipos_disponibles).to.be.a('number'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=resumen", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "resumen" }] },
+            "description": "Consulta de los conteos que muestra el panel general del software."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Areas",
+      "item": [
+        {
+          "name": "06 - Listar areas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - listado de areas', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('datos es un arreglo', function () { pm.expect(pm.response.json().datos).to.be.an('array'); });",
+                  "pm.test('El catalogo trae areas', function () { pm.expect(pm.response.json().datos.length).to.be.above(0); });",
+                  "pm.test('Cada area incluye el conteo de usuarios', function () { pm.expect(pm.response.json().datos[0]).to.have.property('usuarios'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
+            "description": "Lista el catalogo de areas con la cantidad de usuarios de cada una."
+          }
+        },
+        {
+          "name": "07 - Crear area de prueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 201 - area creada', function () { pm.response.to.have.status(201); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('mensaje = Area creada correctamente', function () { pm.expect(pm.response.json().mensaje).to.eql('Área creada correctamente.'); });",
+                  "pm.test('Devuelve el id de la nueva area', function () { pm.expect(pm.response.json().id).to.be.above(0); });",
+                  "pm.collectionVariables.set('id_area', pm.response.json().id);",
+                  "pm.test('El id de la nueva area se guardo para las pruebas', function () { pm.expect(Number(pm.collectionVariables.get('id_area'))).to.be.above(0); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Comercializacion\"\n}" },
             "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
-            "description": "Crea un área. Responde 201 con el id generado."
+            "description": "Crea un area. El id devuelto se guarda en la variable id_area para las siguientes pruebas."
           }
         },
         {
-          "name": "Actualizar area",
+          "name": "08 - Actualizar area de prueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - area actualizada', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('mensaje = Area actualizada correctamente', function () { pm.expect(pm.response.json().mensaje).to.eql('Área actualizada correctamente.'); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"id\": 10,\n  \"nombre\": \"Comercializacion y Ventas\",\n  \"estado\": \"activo\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"id\": {{id_area}},\n  \"nombre\": \"Comercializacion y Ventas\",\n  \"estado\": \"activo\"\n}" },
             "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
-            "description": "Actualiza el nombre y el estado de un área."
+            "description": "Actualiza el nombre y el estado del area creada en la prueba 07."
           }
         },
         {
-          "name": "Eliminar area",
+          "name": "09 - Verificar area actualizada en el listado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - listado de areas', function () { pm.response.to.have.status(200); });",
+                  "var encontrada = pm.response.json().datos.filter(function (a) { return String(a.id) === pm.collectionVariables.get('id_area'); });",
+                  "pm.test('El area actualizada aparece en el listado', function () { pm.expect(encontrada.length).to.eql(1); });",
+                  "pm.test('El nombre fue actualizado', function () { pm.expect(encontrada[0].nombre).to.eql('Comercializacion y Ventas'); });",
+                  "pm.test('El estado es activo', function () { pm.expect(encontrada[0].estado).to.eql('activo'); });"
+                ]
+              }
+            }
+          ],
           "request": {
-            "method": "DELETE",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"id\": 10\n}" },
+            "method": "GET",
             "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
-            "description": "Elimina un área. Responde 409 si tiene usuarios asociados."
-          }
-        }
-      ]
-    },
-    {
-      "name": "Usuarios",
-      "item": [
-        {
-          "name": "Listar usuarios",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
-            "description": "Lista los usuarios con el nombre de su área."
+            "description": "Comprobacion de persistencia: el cambio de la prueba 08 quedo guardado en la base de datos."
           }
         },
         {
-          "name": "Crear usuario",
+          "name": "10 - Crear area sin nombre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 400 - nombre obligatorio', function () { pm.response.to.have.status(400); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = El nombre del area es obligatorio', function () { pm.expect(pm.response.json().error).to.eql('El nombre del área es obligatorio.'); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"identificacion\": \"900112233\",\n  \"nombre\": \"Prueba API EV03\",\n  \"correo_sena\": \"prueba.ev03@sena.edu.co\",\n  \"telefono\": \"3177777777\",\n  \"area_id\": 2\n}" },
-            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
-            "description": "Crea un usuario. El area_id debe existir en el catálogo de áreas."
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
+            "description": "Validacion de datos: el nombre del area llega vacio."
           }
         },
         {
-          "name": "Actualizar usuario",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"id\": 5,\n  \"identificacion\": \"900112233\",\n  \"nombre\": \"Prueba API EV03 Actualizada\",\n  \"correo_sena\": \"prueba.ev03@sena.edu.co\",\n  \"telefono\": \"3177777777\",\n  \"area_id\": 4\n}" },
-            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
-            "description": "Actualiza los datos de un usuario existente."
-          }
-        },
-        {
-          "name": "Eliminar usuario",
+          "name": "11 - Eliminar area con usuarios asociados",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 409 - conflicto de integridad', function () { pm.response.to.have.status(409); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = el area tiene usuarios asociados', function () { pm.expect(pm.response.json().error).to.eql('No se puede eliminar: el área tiene usuarios asociados.'); });"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"id\": 5\n}" },
-            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
-            "description": "Elimina un usuario. Responde 409 si tiene asignaciones registradas."
-          }
-        }
-      ]
-    },
-    {
-      "name": "Equipos",
-      "item": [
-        {
-          "name": "Listar equipos",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
-            "description": "Lista el inventario de equipos con su estado y si están asignados."
-          }
-        },
-        {
-          "name": "Crear equipo",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"tipo_equipo\": \"portatil\",\n  \"serial\": \"SN-EV03-001\",\n  \"placa\": \"PL-9001\",\n  \"tiene_mouse\": 1,\n  \"tiene_teclado\": 1,\n  \"tiene_cargador\": 1,\n  \"tiene_rj45_tipo_c\": 0,\n  \"estado\": \"disponible\"\n}" },
-            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
-            "description": "Registra un equipo en el inventario."
-          }
-        },
-        {
-          "name": "Actualizar equipo",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"id\": 5,\n  \"tipo_equipo\": \"portatil\",\n  \"serial\": \"SN-EV03-001\",\n  \"placa\": \"PL-9001\",\n  \"tiene_mouse\": 0,\n  \"tiene_teclado\": 1,\n  \"tiene_cargador\": 1,\n  \"tiene_rj45_tipo_c\": 0,\n  \"estado\": \"mantenimiento\"\n}" },
-            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
-            "description": "Actualiza los datos o el estado de un equipo."
-          }
-        },
-        {
-          "name": "Eliminar equipo",
-          "request": {
-            "method": "DELETE",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"id\": 5\n}" },
-            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
-            "description": "Elimina un equipo. Responde 409 si tiene asignaciones registradas."
-          }
-        }
-      ]
-    },
-    {
-      "name": "Asignaciones",
-      "item": [
-        {
-          "name": "Listar asignaciones",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }] },
-            "description": "Lista las asignaciones con el usuario, el equipo y el administrador."
-          }
-        },
-        {
-          "name": "Asignar equipo",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"usuario_id\": 5,\n  \"equipo_id\": 5,\n  \"admin_id\": 1\n}" },
-            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }] },
-            "description": "Asigna un equipo disponible a un usuario. Responde 409 si el equipo no está disponible."
-          }
-        },
-        {
-          "name": "Devolver equipo",
-          "request": {
-            "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\n  \"id\": 1\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
+            "description": "Integridad referencial: el area 1 tiene usuarios asociados, por lo que no se puede eliminar."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Usuarios",
+      "item": [
+        {
+          "name": "12 - Listar usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - listado de usuarios', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('datos es un arreglo', function () { pm.expect(pm.response.json().datos).to.be.an('array'); });",
+                  "pm.test('Cada usuario incluye el nombre de su area', function () { pm.expect(pm.response.json().datos[0]).to.have.property('area'); });",
+                  "pm.test('Los correos usan el dominio institucional', function () { pm.expect(pm.response.json().datos[0].correo_sena).to.include('@'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Lista los usuarios del proyecto con el nombre del area a la que pertenecen."
+          }
+        },
+        {
+          "name": "13 - Crear usuario de prueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 201 - usuario creado', function () { pm.response.to.have.status(201); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('mensaje = Usuario creado correctamente', function () { pm.expect(pm.response.json().mensaje).to.eql('Usuario creado correctamente.'); });",
+                  "pm.test('Devuelve el id del nuevo usuario', function () { pm.expect(pm.response.json().id).to.be.above(0); });",
+                  "pm.collectionVariables.set('id_usuario', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"identificacion\": \"900112233\",\n  \"nombre\": \"Usuario de prueba EV04\",\n  \"correo_sena\": \"prueba.ev04@sena.edu.co\",\n  \"telefono\": \"3177777777\",\n  \"area_id\": 2\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Crea un usuario. El id devuelto se guarda en la variable id_usuario."
+          }
+        },
+        {
+          "name": "14 - Crear usuario con identificacion repetida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 409 - dato duplicado', function () { pm.response.to.have.status(409); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = restriccion de la base de datos', function () { pm.expect(pm.response.json().error).to.include('restricción de la base de datos'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"identificacion\": \"900112233\",\n  \"nombre\": \"Usuario duplicado EV04\",\n  \"correo_sena\": \"duplicado.ev04@sena.edu.co\",\n  \"telefono\": \"3177777777\",\n  \"area_id\": 2\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Integridad: la identificacion ya existe en la prueba 13."
+          }
+        },
+        {
+          "name": "15 - Crear usuario con area inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 404 - referencia inexistente', function () { pm.response.to.have.status(404); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = El area indicada no existe', function () { pm.expect(pm.response.json().error).to.eql('El área indicada no existe.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"identificacion\": \"900998877\",\n  \"nombre\": \"Usuario sin area EV04\",\n  \"correo_sena\": \"sinarea.ev04@sena.edu.co\",\n  \"telefono\": \"3177777777\",\n  \"area_id\": 9999\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Integridad referencial: el area_id 9999 no existe en el catalogo."
+          }
+        },
+        {
+          "name": "16 - Crear usuario con datos incompletos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 400 - campos obligatorios', function () { pm.response.to.have.status(400); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = campos obligatorios', function () { pm.expect(pm.response.json().error).to.eql('identificacion, nombre, correo_sena, telefono y area_id son obligatorios.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"identificacion\": \"900445566\",\n  \"nombre\": \"Usuario incompleto EV04\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Validacion: faltan correo_sena, telefono y area_id."
+          }
+        },
+        {
+          "name": "17 - Actualizar usuario de prueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - usuario actualizado', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('mensaje = Usuario actualizado correctamente', function () { pm.expect(pm.response.json().mensaje).to.eql('Usuario actualizado correctamente.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": {{id_usuario}},\n  \"identificacion\": \"900112233\",\n  \"nombre\": \"Usuario de prueba EV04 actualizado\",\n  \"correo_sena\": \"prueba.ev04@sena.edu.co\",\n  \"telefono\": \"3178888888\",\n  \"area_id\": 4\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Actualiza los datos del usuario creado en la prueba 13 y lo cambia de area."
+          }
+        },
+        {
+          "name": "18 - Actualizar usuario inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 404 - usuario no existe', function () { pm.response.to.have.status(404); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = El usuario no existe', function () { pm.expect(pm.response.json().error).to.eql('El usuario no existe.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 999999,\n  \"identificacion\": \"900000000\",\n  \"nombre\": \"Usuario inexistente EV04\",\n  \"correo_sena\": \"inexistente.ev04@sena.edu.co\",\n  \"telefono\": \"3177777777\",\n  \"area_id\": 2\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Prueba de robustez: el id 999999 no corresponde a ningun usuario."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Equipos",
+      "item": [
+        {
+          "name": "19 - Listar equipos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - inventario de equipos', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('datos es un arreglo', function () { pm.expect(pm.response.json().datos).to.be.an('array'); });",
+                  "pm.test('Cada equipo tiene placa y serial', function () { pm.expect(pm.response.json().datos[0]).to.have.property('placa'); pm.expect(pm.response.json().datos[0]).to.have.property('serial'); });",
+                  "pm.test('Cada equipo indica si esta asignado', function () { pm.expect(pm.response.json().datos[0]).to.have.property('asignado'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Lista el inventario de equipos con su estado y la asignacion activa."
+          }
+        },
+        {
+          "name": "20 - Crear equipo de prueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 201 - equipo creado', function () { pm.response.to.have.status(201); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('mensaje = Equipo creado correctamente', function () { pm.expect(pm.response.json().mensaje).to.eql('Equipo creado correctamente.'); });",
+                  "pm.test('Devuelve el id del nuevo equipo', function () { pm.expect(pm.response.json().id).to.be.above(0); });",
+                  "pm.collectionVariables.set('id_equipo', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo_equipo\": \"portatil\",\n  \"serial\": \"SN-EV04-001\",\n  \"placa\": \"PL-EV04-01\",\n  \"tiene_mouse\": 1,\n  \"tiene_teclado\": 1,\n  \"tiene_cargador\": 1,\n  \"tiene_rj45_tipo_c\": 0,\n  \"estado\": \"disponible\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Registra un equipo portatil de prueba. El id se guarda en la variable id_equipo."
+          }
+        },
+        {
+          "name": "21 - Actualizar equipo a mantenimiento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - equipo actualizado', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('mensaje = Equipo actualizado correctamente', function () { pm.expect(pm.response.json().mensaje).to.eql('Equipo actualizado correctamente.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": {{id_equipo}},\n  \"tipo_equipo\": \"portatil\",\n  \"serial\": \"SN-EV04-001\",\n  \"placa\": \"PL-EV04-01\",\n  \"tiene_mouse\": 0,\n  \"tiene_teclado\": 1,\n  \"tiene_cargador\": 1,\n  \"tiene_rj45_tipo_c\": 0,\n  \"estado\": \"mantenimiento\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Cambia el estado del equipo a mantenimiento y retira el mouse del inventario."
+          }
+        },
+        {
+          "name": "22 - Crear equipo con tipo invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 400 - tipo de equipo invalido', function () { pm.response.to.have.status(400); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = tipo_equipo debe ser equipo_mesa o portatil', function () { pm.expect(pm.response.json().error).to.eql('tipo_equipo debe ser equipo_mesa o portatil.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo_equipo\": \"tablet\",\n  \"serial\": \"SN-EV04-ERR\",\n  \"placa\": \"PL-EV04-ERR\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Validacion: el catalogo solo admite equipo_mesa y portatil."
+          }
+        },
+        {
+          "name": "23 - Crear equipo con serial repetido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 409 - serial duplicado', function () { pm.response.to.have.status(409); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = restriccion de la base de datos', function () { pm.expect(pm.response.json().error).to.include('restricción de la base de datos'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo_equipo\": \"portatil\",\n  \"serial\": \"SN-EV04-001\",\n  \"placa\": \"PL-EV04-02\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Integridad: el serial SN-EV04-001 ya fue registrado en la prueba 20."
+          }
+        },
+        {
+          "name": "24 - Restaurar equipo a disponible",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - equipo disponible otra vez', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "var equipo = pm.response.json(); pm.test('Respuesta correcta', function () { pm.expect(equipo.ok).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": {{id_equipo}},\n  \"tipo_equipo\": \"portatil\",\n  \"serial\": \"SN-EV04-001\",\n  \"placa\": \"PL-EV04-01\",\n  \"tiene_mouse\": 1,\n  \"tiene_teclado\": 1,\n  \"tiene_cargador\": 1,\n  \"tiene_rj45_tipo_c\": 0,\n  \"estado\": \"disponible\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Deja el equipo en estado disponible para poder asignarlo en las pruebas de asignaciones."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Asignaciones",
+      "item": [
+        {
+          "name": "25 - Asignar equipo a usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 201 - equipo asignado', function () { pm.response.to.have.status(201); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('mensaje = Equipo asignado correctamente', function () { pm.expect(pm.response.json().mensaje).to.eql('Equipo asignado correctamente.'); });",
+                  "pm.test('Devuelve el id de la asignacion', function () { pm.expect(pm.response.json().id).to.be.above(0); });",
+                  "pm.collectionVariables.set('id_asignacion', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"usuario_id\": {{id_usuario}},\n  \"equipo_id\": {{id_equipo}},\n  \"admin_id\": {{id_admin}}\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }] },
+            "description": "Entrega el equipo disponible al usuario de prueba. Usa los ids capturados en las pruebas anteriores."
+          }
+        },
+        {
+          "name": "26 - Listar asignaciones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - listado de asignaciones', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "var asignacion = pm.response.json().datos.filter(function (a) { return String(a.id) === pm.collectionVariables.get('id_asignacion'); });",
+                  "pm.test('La asignacion nueva aparece en el listado', function () { pm.expect(asignacion.length).to.eql(1); });",
+                  "pm.test('La asignacion figura como activa', function () { pm.expect(asignacion[0].estado_asignacion).to.eql('activa'); });",
+                  "pm.test('La asignacion incluye usuario, placa y administrador', function () { pm.expect(asignacion[0]).to.have.property('usuario'); pm.expect(asignacion[0]).to.have.property('placa'); pm.expect(asignacion[0]).to.have.property('administrador'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }] },
+            "description": "Consulta las asignaciones con el nombre del usuario, la placa del equipo y el administrador."
+          }
+        },
+        {
+          "name": "27 - Verificar que el equipo quedo asignado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - inventario actualizado', function () { pm.response.to.have.status(200); });",
+                  "var equipo = pm.response.json().datos.filter(function (e) { return String(e.id) === pm.collectionVariables.get('id_equipo'); });",
+                  "pm.test('El equipo aparece en el inventario', function () { pm.expect(equipo.length).to.eql(1); });",
+                  "pm.test('El estado del equipo es asignado', function () { pm.expect(equipo[0].estado).to.eql('asignado'); });",
+                  "pm.test('El equipo tiene una asignacion activa', function () { pm.expect(Number(equipo[0].asignado)).to.eql(1); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Comprobacion del efecto de la asignacion: el equipo cambia de disponible a asignado."
+          }
+        },
+        {
+          "name": "28 - Asignar un equipo no disponible",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 409 - equipo no disponible', function () { pm.response.to.have.status(409); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = El equipo no esta disponible', function () { pm.expect(pm.response.json().error).to.eql('El equipo no está disponible para asignación.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"usuario_id\": {{id_usuario}},\n  \"equipo_id\": {{id_equipo}},\n  \"admin_id\": {{id_admin}}\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }] },
+            "description": "Regla de negocio: un equipo ya asignado no se puede entregar otra vez."
+          }
+        },
+        {
+          "name": "29 - Asignar a un usuario inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 404 - usuario inexistente', function () { pm.response.to.have.status(404); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = El usuario no existe', function () { pm.expect(pm.response.json().error).to.eql('El usuario no existe.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"usuario_id\": 999999,\n  \"equipo_id\": {{id_equipo}},\n  \"admin_id\": {{id_admin}}\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }] },
+            "description": "Integridad referencial: el usuario 999999 no existe."
+          }
+        },
+        {
+          "name": "30 - Devolver el equipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - equipo devuelto', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('mensaje = Equipo devuelto correctamente', function () { pm.expect(pm.response.json().mensaje).to.eql('Equipo devuelto correctamente.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": {{id_asignacion}}\n}" },
             "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones&op=devolver", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }, { "key": "op", "value": "devolver" }] },
-            "description": "Registra la devolución del equipo y lo deja disponible."
+            "description": "Registra la devolucion del equipo asignado en la prueba 25."
+          }
+        },
+        {
+          "name": "31 - Devolver el mismo equipo otra vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 409 - devolucion repetida', function () { pm.response.to.have.status(409); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = la asignacion ya fue devuelta', function () { pm.expect(pm.response.json().error).to.eql('La asignación no existe o ya fue devuelta.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": {{id_asignacion}}\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=asignaciones&op=devolver", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "asignaciones" }, { "key": "op", "value": "devolver" }] },
+            "description": "Prueba de robustez: la asignacion 30 ya quedo como devuelta."
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Integridad y cierre",
+      "item": [
+        {
+          "name": "32 - Eliminar usuario con asignacion registrada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 409 - usuario con asignaciones', function () { pm.response.to.have.status(409); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = el usuario tiene asignaciones registradas', function () { pm.expect(pm.response.json().error).to.eql('No se puede eliminar: el usuario tiene asignaciones registradas.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": {{id_usuario}}\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=usuarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "usuarios" }] },
+            "description": "Integridad referencial: no se puede borrar un usuario con historial de asignaciones."
+          }
+        },
+        {
+          "name": "33 - Eliminar equipo con asignacion registrada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 409 - equipo con asignaciones', function () { pm.response.to.have.status(409); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = el equipo tiene asignaciones registradas', function () { pm.expect(pm.response.json().error).to.eql('No se puede eliminar: el equipo tiene asignaciones registradas.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": {{id_equipo}}\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=equipos", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "equipos" }] },
+            "description": "Integridad referencial: el equipo conserva el registro de la entrega."
+          }
+        },
+        {
+          "name": "34 - Area con metodo no permitido (PATCH)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 405 - metodo no permitido', function () { pm.response.to.have.status(405); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = metodo no permitido para areas', function () { pm.expect(pm.response.json().error).to.eql('Método no permitido para el servicio areas.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Prueba PATCH\"\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
+            "description": "Defecto detectado durante las pruebas: el servicio areas no controlaba el metodo PATCH y respondia con un 200 sin contenido. Se corrigio devolviendo 405."
+          }
+        },
+        {
+          "name": "35 - Consulta a un servicio inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 404 - servicio no encontrado', function () { pm.response.to.have.status(404); });",
+                  "pm.test('ok = false', function () { pm.expect(pm.response.json().ok).to.be.false; });",
+                  "pm.test('error = lista los servicios disponibles', function () { pm.expect(pm.response.json().error).to.include('Servicio no encontrado'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=inventarios", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "inventarios" }] },
+            "description": "Prueba de robustez del router: una ruta no implementada responde 404 con la lista de servicios."
+          }
+        },
+        {
+          "name": "36 - Resumen de control antes de la limpieza",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - resumen de control', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('La devolucion dejo el equipo disponible', function () { pm.expect(pm.response.json().resumen.equipos_asignados).to.eql(0); });",
+                  "pm.test('No hay asignaciones activas', function () { pm.expect(pm.response.json().resumen.asignaciones_activas).to.eql(0); });",
+                  "pm.test('El area de prueba todavia existe', function () { pm.expect(Number(pm.response.json().resumen.areas)).to.be.above(9); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=resumen", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "resumen" }] },
+            "description": "Comprobacion del estado del sistema antes de retirar los datos creados por las pruebas."
+          }
+        },
+        {
+          "name": "37 - Eliminar area de prueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - area eliminada', function () { pm.response.to.have.status(200); });",
+                  "pm.test('mensaje = Area eliminada correctamente', function () { pm.expect(pm.response.json().mensaje).to.eql('Área eliminada correctamente.'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": {{id_area}}\n}" },
+            "url": { "raw": "{{base_url}}/api.php?ruta=areas", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "areas" }] },
+            "description": "Limpieza: el area de las pruebas 07 y 08 no tiene usuarios asociados, por lo que si se puede eliminar."
+          }
+        },
+        {
+          "name": "38 - Verificar que el area fue eliminada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado 200 - resumen final', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ok = true', function () { pm.expect(pm.response.json().ok).to.be.true; });",
+                  "pm.test('El catalogo de areas quedo en su estado inicial', function () { pm.expect(pm.response.json().resumen.areas).to.eql(9); });",
+                  "pm.test('No quedan equipos asignados', function () { pm.expect(pm.response.json().resumen.equipos_asignados).to.eql(0); });",
+                  "pm.test('No quedan asignaciones activas', function () { pm.expect(pm.response.json().resumen.asignaciones_activas).to.eql(0); });",
+                  "pm.test('El panel sigue respondiendo con los 8 indicadores', function () { pm.expect(Object.keys(pm.response.json().resumen).length).to.eql(8); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=resumen", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "resumen" }] },
+            "description": "Comprobacion final: el area de prueba desaparecio del catalogo."
+          }
+        },
+        {
+          "name": "39 - Limpieza final de los datos de prueba en la base de datos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El usuario y el equipo de prueba se retiran con el script SQL', function () { pm.expect(Number(pm.collectionVariables.get('id_usuario'))).to.be.above(0); });",
+                  "pm.test('Motivo: el historial de asignaciones impide borrarlos por la API', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api.php?ruta=resumen", "host": ["{{base_url}}"], "path": ["api.php"], "query": [{ "key": "ruta", "value": "resumen" }] },
+            "description": "El usuario y el equipo de prueba conservan el historial de la entrega, por lo que la API responde 409 al intentar borrarlos (pruebas 32 y 33). Para devolver la base de datos a su estado inicial se ejecuta el script servicio-web/limpiar-datos-prueba.sql, que borra primero la asignacion y luego los registros de prueba."
           }
         }
       ]
